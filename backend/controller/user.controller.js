@@ -43,10 +43,10 @@ export const register = async (req, res) => {
 }
 
 
-export const login = async (res, req) => {
+export const login = async (req, res) => {
     try {
         const { email, password, role } = req.body;
-        if (!!email || !password || !role) {
+        if (!email || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
                 success: false
@@ -119,14 +119,12 @@ export const updateProfile = async (req, res) => {
     try {
         const { fullname, email, bio, skills, phoneNumber } = req.body;
         const file = req.file
-        if (!fullname || !email || !phoneNumber || !bio || !skills) {
-            return res.status(400).json({
-                message: "Something is missing",
-                success: false
-            })
+
+        let skillsArray;
+        if (skills) {
+            skillsArray = skills.split(",");
         }
 
-        const skillsArray = skills.split(",");
         const userId = req.id;
 
         let user = await User.findById(userId);
@@ -138,11 +136,11 @@ export const updateProfile = async (req, res) => {
             })
         }
 
-        user.fullname = fullname,
-            user.email = email,
-            user.phoneNumber = phoneNumber,
-            user.bio = bio,
-            user.profile.skills = skillsArray
+        if (fullname) user.fullname = fullname
+        if (phoneNumber) user.phoneNumber = phoneNumber
+        if (email) user.email = email
+        if (bio) user.profile.bio = bio
+        if (skillsArray) user.profile.skills = skillsArray
 
         await user.save();
 
