@@ -117,7 +117,8 @@ export const logout = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const {fullname, email, bio, skills, phoneNumber} = req.body;
+        const { fullname, email, bio, skills, phoneNumber } = req.body;
+        const file = req.file
         if (!fullname || !email || !phoneNumber || !bio || !skills) {
             return res.status(400).json({
                 message: "Something is missing",
@@ -130,23 +131,35 @@ export const updateProfile = async (req, res) => {
 
         let user = await User.findById(userId);
 
-        if(!user){
+        if (!user) {
             res.status(400).json({
                 message: "User not found",
-                success:false
+                success: false
             })
         }
 
         user.fullname = fullname,
-        user.email = email,
-        user.phoneNumber = phoneNumber,
-        user.bio = bio,
-        user.profile.skills = skillsArray
+            user.email = email,
+            user.phoneNumber = phoneNumber,
+            user.bio = bio,
+            user.profile.skills = skillsArray
 
         await user.save();
 
-        
+        user = {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            profile: user.profile
+        }
 
+        return res.status(200).json({
+            message: "Profile Updated Successfully",
+            success: true,
+            user
+        })
     } catch (error) {
         console.log(error);
     }
